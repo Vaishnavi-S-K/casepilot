@@ -81,8 +81,18 @@ router.post('/', async (req, res, next) => {
 // PUT /api/tasks/:id
 router.put('/:id', async (req, res, next) => {
   try {
+    const existing = await Task.findById(req.params.id);
+    if (!existing) return res.status(404).json({ success: false, error: 'Task not found' });
+
+    // Ownership check — only the task owner or creator can edit
+    const currentUser = (req.headers['x-user-name'] || '').trim().toLowerCase();
+    const taskOwner = (existing.owner || '').trim().toLowerCase();
+    const taskCreator = (existing.createdBy || '').trim().toLowerCase();
+    if (currentUser && taskOwner && currentUser !== taskOwner && currentUser !== taskCreator) {
+      return res.status(403).json({ success: false, error: 'You can only edit your own tasks' });
+    }
+
     const item = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!item) return res.status(404).json({ success: false, error: 'Task not found' });
     await createAlert({
       entity: 'Task',
       action: 'updated',
@@ -99,16 +109,26 @@ router.put('/:id', async (req, res, next) => {
 // DELETE /api/tasks/:id
 router.delete('/:id', async (req, res, next) => {
   try {
-    const item = await Task.findByIdAndDelete(req.params.id);
-    if (!item) return res.status(404).json({ success: false, error: 'Task not found' });
+    const existing = await Task.findById(req.params.id);
+    if (!existing) return res.status(404).json({ success: false, error: 'Task not found' });
+
+    // Ownership check — only the task owner or creator can delete
+    const currentUser = (req.headers['x-user-name'] || '').trim().toLowerCase();
+    const taskOwner = (existing.owner || '').trim().toLowerCase();
+    const taskCreator = (existing.createdBy || '').trim().toLowerCase();
+    if (currentUser && taskOwner && currentUser !== taskOwner && currentUser !== taskCreator) {
+      return res.status(403).json({ success: false, error: 'You can only delete your own tasks' });
+    }
+
+    await Task.findByIdAndDelete(req.params.id);
     await createAlert({
       entity: 'Task',
       action: 'deleted',
-      name: item.title,
+      name: existing.title,
       triggeredBy: req.headers['x-user-name'] || 'System',
-      entityId: item._id,
+      entityId: existing._id,
     });
-    res.json({ success: true, data: item });
+    res.json({ success: true, data: existing });
   } catch (err) {
     next(err);
   }

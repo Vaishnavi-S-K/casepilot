@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, List, LayoutGrid, GripVertical, CheckCircle2, Circle, Clock } from 'lucide-react';
+import { Plus, Pencil, Trash2, List, LayoutGrid, GripVertical, CheckCircle2, Circle, Clock, Lock, Eye } from 'lucide-react';
 import PageShell, { AnimatedItem } from '../components/layout/PageShell';
 import FilterBar from '../components/ui/FilterBar';
 import Badge from '../components/ui/Badge';
@@ -10,7 +10,7 @@ import MiniProgress from '../components/ui/MiniProgress';
 import { ShimmerTable } from '../components/ui/Shimmer';
 import BlankSlate from '../components/ui/BlankSlate';
 import { tasksAPI, casesAPI } from '../api/client';
-import { getUsers } from '../utils/authStore';
+import { getSession, getUsers } from '../utils/authStore';
 import { formatDate, urgencyColor } from '../utils/formatters';
 import useDebounce from '../hooks/useDebounce';
 import useLocalStorage from '../hooks/useLocalStorage';
@@ -23,6 +23,8 @@ const STAGE_COLOR = { Backlog:'gray', Todo:'sky', 'In Progress':'indigo', Review
 const emptyForm = { title:'', details:'', caseId:'', owner:'', urgency:'Medium', stage:'To Do', deadline:'', plannedHours:'', loggedHours:'', progress:0, checklist:[] };
 
 export default function Tasks() {
+  const session = getSession();
+  const currentUser = session?.name || '';
   const [tasks, setTasks] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -31,6 +33,7 @@ export default function Tasks() {
   const [filters, setFilters] = useState({ search:'', stage:'', urgency:'', owner:'' });
   const debouncedSearch = useDebounce(filters.search);
   const [view, setView] = useLocalStorage('cp-task-view','list');
+  const [scope, setScope] = useLocalStorage('cp-task-scope','my');  // 'my' | 'all'
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -42,6 +45,12 @@ export default function Tasks() {
   const [newCheckItem, setNewCheckItem] = useState('');
   const teamMembers = getUsers();
 
+  /* ownership helper */
+  const isOwner = (t) => {
+    const u = currentUser.toLowerCase().trim();
+    return u === (t.owner || '').toLowerCase().trim() || u === (t.createdBy || '').toLowerCase().trim();
+  };
+
   const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
@@ -50,16 +59,19 @@ export default function Tasks() {
       if (filters.stage) params.stage = filters.stage;
       if (filters.urgency) params.urgency = filters.urgency;
       if (filters.owner) params.owner = filters.owner;
+      // In "My Tasks" scope, force-filter to current user's name
+      if (scope === 'my' && currentUser) params.owner = currentUser;
       const res = await tasksAPI.getAll(params);
       setTasks(res.data || []);
       setTotal(res.total || 0);
       setPages(res.pages || 1);
     } catch { toast.error('Failed to load tasks'); }
     finally { setLoading(false); }
-  }, [page, debouncedSearch, filters.stage, filters.urgency, filters.owner, view]);
+  }, [page, debouncedSearch, filters.stage, filters.urgency, filters.owner, view, scope, currentUser]);
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
   useEffect(() => { casesAPI.getAll({ limit:100 }).then(r=>setCases(r.data||[])).catch(()=>{}); }, []);
+  useEffect(() => { setPage(1); }, [scope]); // reset page when scope changes
 
   const handleFilter = (k,v) => { setFilters(p=>({...p,[k]:v})); setPage(1); };
   const clearFilters = () => { setFilters({search:'',stage:'',urgency:'',owner:''}); setPage(1); };
@@ -94,7 +106,7 @@ export default function Tasks() {
       setSaving(true);
       const payload = {...form, plannedHours:Number(form.plannedHours)||0, loggedHours:Number(form.loggedHours)||0, progress:Number(form.progress)||0 };
       if (editing) { await tasksAPI.update(editing._id, payload); toast.success('Task updated'); }
-      else { await tasksAPI.create(payload); toast.success('Task created'); }
+      else { payload.createdBy = currentUser; await tasksAPI.create(payload); toast.success('Task created'); }
       setModalOpen(false); fetchTasks();
     } catch(err) { toast.error(err.response?.data?.error||'Save failed'); }
     finally { setSaving(false); }
@@ -118,8 +130,11 @@ export default function Tasks() {
     setForm(p=>({...p, checklist:p.checklist.filter((_,i)=>i!==idx)}));
   };
 
-  /* Quick stage change on board drag */
-  const handleDragStart = (e, t) => { e.dataTransfer.setData('taskId', t._id); };
+  /* Quick stage change on board drag — only allowed for own tasks */
+  const handleDragStart = (e, t) => {
+    if (!isOwner(t)) { e.preventDefault(); return; }
+    e.dataTransfer.setData('taskId', t._id);
+  };
   const handleDrop = async (e, newStage) => {
     e.preventDefault();
     const id = e.dataTransfer.getData('taskId');
@@ -127,7 +142,7 @@ export default function Tasks() {
     try {
       await tasksAPI.update(id, { stage: newStage });
       fetchTasks();
-    } catch { toast.error('Move failed'); }
+    } catch(err) { toast.error(err.response?.data?.error || 'Move failed'); }
   };
 
   return (
@@ -139,6 +154,12 @@ export default function Tasks() {
             <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-badge">{total}</span>
           </div>
           <div className="flex items-center gap-3">
+            {/* Scope toggle: My Tasks / All Tasks */}
+            <div className="flex items-center bg-white border border-cp-border rounded-input">
+              <button onClick={()=>setScope('my')} className={`px-3 py-1.5 text-xs font-semibold rounded-l-input transition-colors ${scope==='my'?'bg-indigo-600 text-white':'text-gray-500 hover:text-gray-700'}`}>My Tasks</button>
+              <button onClick={()=>setScope('all')} className={`px-3 py-1.5 text-xs font-semibold rounded-r-input transition-colors ${scope==='all'?'bg-indigo-600 text-white':'text-gray-500 hover:text-gray-700'}`}>All Tasks</button>
+            </div>
+            {/* View toggle */}
             <div className="flex items-center bg-white border border-cp-border rounded-input">
               <button onClick={()=>setView('list')} className={`p-2 rounded-l-input ${view==='list'?'bg-indigo-50 text-indigo-600':'text-gray-400'}`}><List size={16} /></button>
               <button onClick={()=>setView('board')} className={`p-2 rounded-r-input ${view==='board'?'bg-indigo-50 text-indigo-600':'text-gray-400'}`}><LayoutGrid size={16} /></button>
@@ -146,6 +167,9 @@ export default function Tasks() {
             <button onClick={()=>openCreate()} className="btn-primary flex items-center gap-2"><Plus size={16} /> Add Task</button>
           </div>
         </div>
+        {scope==='all' && (
+          <p className="text-xs text-gray-400 mb-3 flex items-center gap-1"><Eye size={12} /> Viewing all tasks across the firm. You can only edit or delete tasks assigned to you.</p>
+        )}
       </AnimatedItem>
 
       <AnimatedItem>
@@ -193,10 +217,14 @@ export default function Tasks() {
                         </td>
                         <td className="px-4 py-2.5 w-28"><MiniProgress value={t.progress||0} /></td>
                         <td className="px-4 py-2.5">
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={()=>openEdit(t)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded"><Pencil size={14} /></button>
-                            <button onClick={()=>setDeleteTarget(t)} className="p-1.5 text-gray-400 hover:text-rose-600 rounded"><Trash2 size={14} /></button>
-                          </div>
+                          {isOwner(t) ? (
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={()=>openEdit(t)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded"><Pencil size={14} /></button>
+                              <button onClick={()=>setDeleteTarget(t)} className="p-1.5 text-gray-400 hover:text-rose-600 rounded"><Trash2 size={14} /></button>
+                            </div>
+                          ) : (
+                            <span className="text-gray-300" title="You can only edit your own tasks"><Lock size={14} /></span>
+                          )}
                         </td>
                       </tr>
                     );
@@ -229,13 +257,15 @@ export default function Tasks() {
                     </div>
                   </div>
                   <div className="p-2 space-y-2 min-h-[120px] max-h-[520px] overflow-y-auto">
-                    {items.map(t => (
-                      <div key={t._id} draggable onDragStart={e=>handleDragStart(e,t)}
-                        className="bg-cp-base rounded-lg p-3 border border-transparent hover:border-indigo-200 hover:shadow-sm cursor-grab active:cursor-grabbing transition-all group/card"
+                    {items.map(t => {
+                      const owned = isOwner(t);
+                      return (
+                      <div key={t._id} draggable={owned} onDragStart={e=>handleDragStart(e,t)}
+                        className={`bg-cp-base rounded-lg p-3 border border-transparent hover:border-indigo-200 hover:shadow-sm transition-all group/card ${owned?'cursor-grab active:cursor-grabbing':'cursor-default opacity-80'}`}
                       >
                         <div className="flex items-start justify-between gap-1 mb-1">
                           <span className="text-sm font-medium text-gray-900 leading-tight">{t.title}</span>
-                          <GripVertical size={14} className="text-gray-300 flex-shrink-0 mt-0.5" />
+                          {owned ? <GripVertical size={14} className="text-gray-300 flex-shrink-0 mt-0.5" /> : <Lock size={12} className="text-gray-300 flex-shrink-0 mt-0.5" title="Not your task" />}
                         </div>
                         {t.caseId?.ref && <p className="text-[10px] font-mono text-gray-400 mb-1.5">{t.caseId.ref}</p>}
                         <div className="flex items-center gap-1.5 mb-2">
@@ -243,15 +273,18 @@ export default function Tasks() {
                           {t.deadline && <span className="text-[10px] text-gray-400">{formatDate(t.deadline)}</span>}
                         </div>
                         <MiniProgress value={t.progress||0} />
-                        <div className="flex items-center justify-between mt-2 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-between mt-2">
                           <span className="text-[10px] text-gray-400">{t.owner||'Unassigned'}</span>
-                          <div className="flex gap-1">
-                            <button onClick={()=>openEdit(t)} className="text-gray-400 hover:text-indigo-600"><Pencil size={12} /></button>
-                            <button onClick={()=>setDeleteTarget(t)} className="text-gray-400 hover:text-rose-600"><Trash2 size={12} /></button>
-                          </div>
+                          {owned ? (
+                            <div className="flex gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                              <button onClick={()=>openEdit(t)} className="text-gray-400 hover:text-indigo-600"><Pencil size={12} /></button>
+                              <button onClick={()=>setDeleteTarget(t)} className="text-gray-400 hover:text-rose-600"><Trash2 size={12} /></button>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
