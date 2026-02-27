@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
+  BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   FunnelChart, Funnel, LabelList,
 } from 'recharts';
@@ -358,7 +358,7 @@ export default function Insights() {
           <FileText size={14} /> Document Health
         </h2>
       </AnimatedItem>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-5 mb-8">
         {/* Docs by Review Status — Pie */}
         <AnimatedItem>
           <div className="card p-5">
@@ -373,48 +373,6 @@ export default function Insights() {
                 <Tooltip content={<CustomTooltip />} />
                 <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </AnimatedItem>
-
-        {/* Avg Days in Status */}
-        <AnimatedItem>
-          <div className="card p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">Avg Days in Status</h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={docs.docAvgDays || []} margin={{ top: 5, right: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="name" tick={{ fontSize: 9 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="avgDays" name="Avg Days" radius={[6, 6, 0, 0]}>
-                  {(docs.docAvgDays || []).map((entry, i) => (
-                    <Cell key={i} fill={DOC_COLORS[entry.name] || PALETTE[i % PALETTE.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </AnimatedItem>
-
-        {/* Overdue Documents Trend — Area */}
-        <AnimatedItem>
-          <div className="card p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">Overdue Docs Trend</h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={docs.overdueByMonth || []} margin={{ top: 5, right: 10, bottom: 0, left: 0 }}>
-                <defs>
-                  <linearGradient id="overdueGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#EF4444" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#EF4444" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="count" stroke="#EF4444" fill="url(#overdueGrad)" strokeWidth={2} name="Overdue Docs" />
-              </AreaChart>
             </ResponsiveContainer>
           </div>
         </AnimatedItem>

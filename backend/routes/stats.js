@@ -339,37 +339,6 @@ router.get('/insights', async (req, res, next) => {
     });
     const docsByStatus = Object.entries(docStatusMap).map(([name, value]) => ({ name, value }));
 
-    // Avg days in each review status (approx — using age since creation)
-    const docStatusAge = {};
-    docsInRange.forEach(d => {
-      if (!docStatusAge[d.reviewStatus]) docStatusAge[d.reviewStatus] = [];
-      const age = Math.round((now - new Date(d.updatedAt || d.createdAt)) / 86400000);
-      docStatusAge[d.reviewStatus].push(age);
-    });
-    const docAvgDays = Object.entries(docStatusAge).map(([name, ages]) => ({
-      name,
-      avgDays: Math.round(ages.reduce((a, b) => a + b, 0) / ages.length),
-    }));
-
-    // Overdue Documents per Month (last 6 months — docs that went past dueBy)
-    const overdueByMonth = [];
-    for (let i = 5; i >= 0; i--) {
-      const mStart = new Date();
-      mStart.setMonth(mStart.getMonth() - i, 1);
-      mStart.setHours(0, 0, 0, 0);
-      const mEnd = new Date(mStart);
-      mEnd.setMonth(mEnd.getMonth() + 1);
-      const cnt = await Document.countDocuments({
-        dueBy: { $gte: mStart, $lt: mEnd },
-        reviewStatus: { $nin: ['Filed', 'Approved'] },
-        $expr: { $lt: ['$dueBy', now] },
-      });
-      overdueByMonth.push({
-        month: mStart.toISOString().slice(0, 7),
-        count: cnt,
-      });
-    }
-
     // ═══ Available filter options ═══
     const allAttorneys = await Case.distinct('leadAttorney');
     const allCategoryOptions = await Case.distinct('category');
@@ -381,7 +350,7 @@ router.get('/insights', async (req, res, next) => {
         performance: { resolutionRate, avgDaysToClose, taskOnTimeRate, totalInRange, closedCount, caseOutcomes },
         attorneys: { attorneyWorkload, billableByAttorney, taskCompletionByAttorney, avgCaseValue },
         pipeline: { funnel: funnelData, heatmap: heatmapData, statuses: allStatuses, categories: allCategories },
-        documents: { docsByStatus, docAvgDays, overdueByMonth },
+        documents: { docsByStatus },
       },
     });
   } catch (err) {

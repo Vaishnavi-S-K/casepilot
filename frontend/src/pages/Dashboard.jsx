@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Briefcase, Users, ListChecks, FileCheck, TrendingUp, RefreshCw, Clock, Scale, CalendarClock, FileText, Gavel } from 'lucide-react';
+import { Briefcase, Users, ListChecks, FileCheck, TrendingUp, RefreshCw, Scale, CalendarClock, FileText, Gavel } from 'lucide-react';
 import PageShell, { AnimatedItem } from '../components/layout/PageShell';
 import KPICard from '../components/ui/KPICard';
 import Badge from '../components/ui/Badge';
@@ -110,25 +110,10 @@ export default function Dashboard() {
       <AnimatedItem>
         <div className="mb-6">
           <h2 className="text-sm font-heading font-bold text-indigo-600 uppercase tracking-wider mb-3">My Work</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <KPICard title="My Cases" value={myWork.myCases || 0} icon={Scale} topColor="indigo" subtitle={`${myWork.myActiveCases || 0} active`} />
             <KPICard title="My Tasks" value={myWork.myOpenTasks || 0} icon={ListChecks} topColor="teal" subtitle={`of ${myWork.myTasks || 0} total`} />
             <KPICard title="My Docs" value={myWork.myDocs || 0} icon={FileText} topColor="violet" subtitle="Prepared by you" />
-            <KPICard title="Hours Logged" value={myWork.myBillable?.logged || 0} icon={Clock} topColor="warning" subtitle={`of ${myWork.myBillable?.planned || 0}h planned`} />
-            <div className="card p-4 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-emerald-500" />
-              <p className="text-xs font-semibold text-gray-500 mb-1">Billable Utilization</p>
-              <p className="text-2xl font-heading font-extrabold text-gray-900">
-                {myWork.myBillable?.planned ? Math.round((myWork.myBillable.logged / myWork.myBillable.planned) * 100) : 0}%
-              </p>
-              <div className="w-full bg-gray-100 rounded-full h-2 mt-2">
-                <div
-                  className="h-2 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-700"
-                  style={{ width: `${Math.min(myWork.myBillable?.planned ? (myWork.myBillable.logged / myWork.myBillable.planned) * 100 : 0, 100)}%` }}
-                />
-              </div>
-              <p className="text-[10px] text-gray-400 mt-1">{myWork.myBillable?.logged || 0}h / {myWork.myBillable?.planned || 0}h</p>
-            </div>
           </div>
         </div>
       </AnimatedItem>

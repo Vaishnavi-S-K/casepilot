@@ -18,16 +18,16 @@
 
 | Module | Highlights |
 |--------|-----------|
-| **Dashboard** | Personalized "My Work" row (my cases, tasks, docs, billable utilization), firm-wide KPI cards, 3 interactive charts, "This Week's Deadlines" timeline, recent-cases table, upcoming-hearings list |
+| **Dashboard** | Personalized "My Work" row (my cases, tasks, docs), firm-wide KPI cards, 3 interactive charts, "This Week's Deadlines" timeline, recent-cases table, upcoming-hearings list |
 | **Cases** | Full CRUD, filters (category / status / urgency), auto-generated refs (CP-YYYY-NNNN), detailed case profiles with **status progress pipeline**, print/export |
-| **Documents** | Upload with drag-and-drop, revision tracking, review-status workflow (Draft → Filed), due-date alerts |
-| **Tasks** | List + Kanban board views, drag-and-drop stage changes, checklist support, progress tracking, billable-hours logging |
-| **Clients** | Card + Table views, tier badges (VIP / Premium / Standard), billing totals, standing status |
+| **Documents** | Upload with drag-and-drop, revision tracking, review-status workflow (Draft → Filed), due-date alerts, remarks column |
+| **Tasks** | List + Kanban board views, drag-and-drop stage changes (Backlog → Todo → In Progress → Review → Done → Dropped), checklist support, progress tracking |
+| **Clients** | Card + Table views, tier badges (VIP / Premium / Standard), billing totals, standing status, internal notes |
 | **Calendar** | Monthly grid with colored event dots (hearings, filings, tasks, doc deadlines), day-detail side panel, month navigation |
-| **Insights** | 8-chart analytics dashboard — cases by category, status pie, filing trend, tasks by stage, urgency distribution, doc review status, **attorney workload**, **billable hours by attorney** |
+| **Insights** | Deep-dive analytics with **date range / attorney / category filters** — 4 performance KPIs, attorney performance charts (cases per attorney, task completion, case outcomes, workload balance), case pipeline funnel + category heatmap, document review-status pie |
 | **Notifications** | Slide-in drawer, auto-alerts on every CRUD action, mark read / clear, 30-second polling |
 | **Quick Search** | `Ctrl+K` overlay, parallel search across all collections, keyboard navigation, recent searches |
-| **Team Members** | Admin-only member list, role display |
+| **Team Members** | Admin-only member list, role display, admin toggle (grant/revoke admin status) |
 | **My Account** | View & edit profile (name, email, role) |
 | **Seed Data** | One-click demo-data generation (10 clients, 20 cases, 20 documents, 20 tasks) |
 
@@ -39,8 +39,8 @@
 
 ### Dashboard (`/`)
 1. **Greeting banner** — time-aware message ("Good morning, Arjun 👋"), today's date, attention-items count
-2. **My Work row** — 5 cards personalised to the logged-in attorney:
-   - *My Cases* (total + active), *My Tasks* (open + total), *My Docs*, *Hours Logged* (logged vs planned), *Billable Utilization* (% progress bar)
+2. **My Work row** — 3 cards personalised to the logged-in attorney:
+   - *My Cases* (total + active), *My Tasks* (open + total), *My Docs*
 3. **Firm KPI row** — Active Cases, Total Clients, Open Tasks, Docs Filed, Portfolio Value
 4. **Charts row** — Cases by Category (bar), Status Overview (pie)
 5. **Trend + Progress row** — Filing trend (area chart, last 6 months) + recent-cases quick-list
@@ -54,18 +54,20 @@
 - **Export/Print** button for cases table
 
 ### Documents (`/documents`)
-- Filterable table: name, type, review status, case ref, prepared-by, due date, revision
+- Filterable table: name, type, review status, case ref, prepared-by, due date, remarks, revision
 - Drag-and-drop file upload (Multer, 20 MB limit)
 - Status workflow badges (Draft → Submitted → Under Review → Approved → Filed)
 
 ### Tasks (`/tasks`)
 - List view with filters (stage, urgency, owner)
-- Kanban board with drag-and-drop across stages (Backlog → Todo → In Progress → Review → Done)
+- Kanban board with drag-and-drop across stages (Backlog → Todo → In Progress → Review → Done → Dropped)
 - Progress bar, checklist items, planned vs logged hours per task
+- Urgency levels: Critical, High, Standard, Low
 
 ### Clients (`/clients`)
 - Toggle between card grid and table view
 - Tier badges (VIP, Premium, Standard), standing indicator, billing totals
+- Internal notes displayed on cards (📝 icon)
 - Full CRUD with detail drawer
 
 ### Calendar (`/calendar`)
@@ -75,16 +77,15 @@
 - Empty-month alert with link to seed demo data when no events exist
 
 ### Insights (`/insights`)
-- 4 KPI summary cards (Total Cases, Clients, Documents, Tasks)
-- 8 charts in a responsive grid:
-  1. Cases by Category — horizontal bar
-  2. Cases by Status — donut/pie
-  3. Filing Trend — area chart
-  4. Tasks by Stage — donut
-  5. Urgency Distribution — vertical bar
-  6. Documents by Review Status — pie
-  7. **Attorney Workload** — horizontal bar (cases per attorney)
-  8. **Billable Hours by Attorney** — grouped bar (logged vs planned)
+- **Filter bar** — date range (1 month / 3 months / 6 months / 12 months), attorney dropdown, case category dropdown; all filters applied server-side
+- **Performance Metrics** — 4 KPI cards: Total (in range), Resolution Rate %, Avg Task Completion %, Overdue Docs count
+- **Attorney Performance** — 4 charts:
+  1. Cases per Attorney — horizontal bar
+  2. Task Completion Rate — vertical bar (% per attorney)
+  3. Case Outcomes — stacked bar (Won / Lost / Settled / Open per attorney)
+  4. Workload Balance — horizontal bar (tasks assigned per attorney)
+- **Case Pipeline** — funnel chart (Pending → Active → On Hold → Appeal → Closed) + category heatmap (horizontal bar)
+- **Document Health** — Review Status donut/pie (Draft / Submitted / Under Review / Approved / Filed)
 
 ### Notifications (drawer)
 - Bell icon in top bar with unread count badge
@@ -97,7 +98,9 @@
 - Recent-search memory
 
 ### Team Members (`/team`)
-- Admin-visible page listing all registered users with name, email, and role
+- Admin-only page (requires `isAdmin` flag) listing all registered users with name, email, role, and admin status
+- Toggle admin status for any member via clickable badge
+- Add new team members with optional admin checkbox
 
 ### My Account (`/account`)
 - View/edit current user's name, email, and role
@@ -206,7 +209,8 @@ curl http://localhost:8080/api/seed
 | GET | `/api/notifications` | List notifications |
 | PUT | `/api/notifications/read-all` | Mark all as read |
 | DELETE | `/api/notifications` | Clear all notifications |
-| GET | `/api/stats` | Dashboard & Insights data (counts, charts, myWork, deadlines) |
+| GET | `/api/stats` | Dashboard data (counts, charts, myWork, deadlines) |
+| GET | `/api/stats/insights` | Insights analytics with filters (`range`, `attorney`, `category`) |
 | GET | `/api/search?q=term` | Cross-collection search |
 | GET | `/api/calendar?year=&month=` | Calendar events for a month |
 | POST | `/api/upload` | File upload (multipart) |
@@ -226,14 +230,28 @@ Response.data:
 ├── charts
 │   ├── casesByCategory, casesByStatus, casesByMonth
 │   ├── tasksByStage, docsByStatus
-│   ├── attorneyWorkload      ← cases per attorney
-│   └── billableByAttorney    ← logged vs planned hours
+│   └── attorneyWorkload      ← cases per attorney
 ├── lists         — recentCases, upcomingHearings, latestAlerts
 └── myWork
     ├── myCases, myActiveCases, myTasks, myOpenTasks, myDocs
-    ├── myBillable { planned, logged }
     ├── myHearings
     └── weekDeadlines [ { type, label, date, meta, ref?, stage?, status? } ]
+```
+
+```
+GET /api/stats/insights?range=12m&attorney=&category=
+
+Response.data:
+├── performance   — totalInRange, resolved, resolutionRate,
+│                   avgTaskCompletion, overdueDocs
+├── attorneys[]   — { name, cases, tasksDone, totalTasks,
+│                   completionRate, outcomes { Won, Lost, Settled, Open },
+│                   taskCount }
+├── pipeline
+│   ├── statusFunnel[]    — [{ name, value }] per case status
+│   └── categoryHeatmap[] — [{ name, value }] per category
+└── documents
+    └── docsByStatus[]    — [{ name, value }] per review status
 ```
 
 ## Project Structure
