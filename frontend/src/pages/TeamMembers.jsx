@@ -11,11 +11,11 @@ import { Navigate } from 'react-router-dom';
 
 const ROLES = ['Admin','Partner','Senior Associate','Associate','Paralegal'];
 
-const emptyForm = { name:'', email:'', password:'Pilot2026', role:'Associate' };
+const emptyForm = { name:'', email:'', password:'Pilot2026', role:'Associate', isAdmin:false };
 
 export default function TeamMembers() {
   const session = getSession();
-  if (session?.role !== 'Admin') return <Navigate to="/dashboard" replace />;
+  if (!session?.isAdmin) return <Navigate to="/dashboard" replace />;
 
   const [members, setMembers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -29,7 +29,7 @@ export default function TeamMembers() {
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setFormErrors({}); setModalOpen(true); };
   const openEdit = (m) => {
-    setEditing(m); setForm({ name:m.name, email:m.email, password:m.password, role:m.role }); setFormErrors({}); setModalOpen(true);
+    setEditing(m); setForm({ name:m.name, email:m.email, password:m.password, role:m.role, isAdmin:!!m.isAdmin }); setFormErrors({}); setModalOpen(true);
   };
 
   const validate = () => {
@@ -45,7 +45,7 @@ export default function TeamMembers() {
   const handleSave = () => {
     if (!validate()) return;
     if (editing) {
-      updateUser(editing.email, { name: form.name, role: form.role, password: form.password });
+      updateUser(editing.email, { name: form.name, role: form.role, password: form.password, isAdmin: form.isAdmin });
       toast.success('Member updated');
     } else {
       const existing = getUsers().find(u => u.email === form.email);
@@ -85,6 +85,7 @@ export default function TeamMembers() {
                 <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Member</th>
                 <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Email</th>
                 <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Role</th>
+                <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Admin</th>
                 <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Password</th>
                 <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Actions</th>
               </tr></thead>
@@ -101,6 +102,17 @@ export default function TeamMembers() {
                     <td className="px-4 py-2.5 text-xs text-gray-500">{m.email}</td>
                     <td className="px-4 py-2.5">
                       <Badge label={m.role} color={m.role==='Admin'?'indigo':m.role==='Partner'?'violet':'gray'} size="sm" />
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <button
+                        onClick={() => { updateUser(m.email, { isAdmin: !m.isAdmin }); loadMembers(); toast.success(`Admin ${m.isAdmin ? 'revoked' : 'granted'}`); }}
+                        disabled={m.email === session.email}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-badge text-[11px] font-semibold transition-colors ${
+                          m.isAdmin ? 'bg-teal-100 text-teal-700 hover:bg-teal-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                        } ${m.email === session.email ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      >
+                        <ShieldCheck size={12} />{m.isAdmin ? 'Yes' : 'No'}
+                      </button>
                     </td>
                     <td className="px-4 py-2.5 text-xs font-mono text-gray-400">{m.password}</td>
                     <td className="px-4 py-2.5">
@@ -140,6 +152,10 @@ export default function TeamMembers() {
               {ROLES.map(r=><option key={r} value={r}>{r}</option>)}
             </select>
           </div>
+          <label className="flex items-center gap-2 cursor-pointer mt-2">
+            <input type="checkbox" checked={form.isAdmin} onChange={e=>setForm({...form,isAdmin:e.target.checked})} className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-400" />
+            <span className="text-sm text-gray-700">Grant admin privileges</span>
+          </label>
         </div>
       </Dialog>
 

@@ -151,6 +151,9 @@ export default function Clients() {
                   <span className="text-xs text-gray-400">Open: {c.openCases||0} / Closed: {c.closedCases||0}</span>
                 </div>
                 {c.billedTotal > 0 && <p className="text-sm font-semibold text-indigo-600 mb-3">{formatCurrency(c.billedTotal)} billed</p>}
+                {c.internalNotes && (
+                  <p className="text-xs text-gray-400 italic mb-3 line-clamp-2" title={c.internalNotes}>📝 {c.internalNotes}</p>
+                )}
                 <div className="flex items-center gap-1 pt-2 border-t border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={()=>openEdit(c)} className="flex-1 btn-ghost text-xs">Edit</button>
                   <button onClick={()=>setDeleteTarget(c)} className="flex-1 btn-danger text-xs">Delete</button>

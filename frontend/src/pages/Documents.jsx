@@ -147,6 +147,7 @@ export default function Documents() {
                   <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Prepared By</th>
                   <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Rev</th>
                   <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Due By</th>
+                  <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Remarks</th>
                   <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">File</th>
                   <th className="px-4 py-2.5 font-semibold text-gray-600 text-xs">Actions</th>
                 </tr></thead>
@@ -165,6 +166,7 @@ export default function Documents() {
                           <span className={overdue?'text-red-600 font-semibold':'text-gray-600'}>{formatDate(d.dueBy)}</span>
                           {overdue && <AlertTriangle size={12} className="inline ml-1 text-red-500" />}
                         </td>
+                        <td className="px-4 py-2.5 text-xs text-gray-500 max-w-[150px] truncate" title={d.remarks||''}>{d.remarks||'—'}</td>
                         <td className="px-4 py-2.5">
                           {d.fileUrl ? <a href={d.fileUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-700"><Paperclip size={14} /></a> : <span className="text-gray-300">—</span>}
                         </td>

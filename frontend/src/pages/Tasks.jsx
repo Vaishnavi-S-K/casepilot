@@ -16,9 +16,9 @@ import useDebounce from '../hooks/useDebounce';
 import useLocalStorage from '../hooks/useLocalStorage';
 import toast from 'react-hot-toast';
 
-const STAGES = ['Backlog','To Do','In Progress','In Review','Blocked','Done'];
-const URGENCY = ['Low','Medium','High','Critical'];
-const STAGE_COLOR = { Backlog:'gray', 'To Do':'sky', 'In Progress':'indigo', 'In Review':'amber', Blocked:'rose', Done:'emerald' };
+const STAGES = ['Backlog','Todo','In Progress','Review','Done','Dropped'];
+const URGENCY = ['Critical','High','Standard','Low'];
+const STAGE_COLOR = { Backlog:'gray', Todo:'sky', 'In Progress':'indigo', Review:'amber', Done:'emerald', Dropped:'rose' };
 
 const emptyForm = { title:'', details:'', caseId:'', owner:'', urgency:'Medium', stage:'To Do', deadline:'', plannedHours:'', loggedHours:'', progress:0, checklist:[] };
 
