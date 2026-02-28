@@ -21,7 +21,7 @@
 | **Dashboard** | Personalized "My Work" row (my cases, tasks, docs), firm-wide KPI cards, 3 interactive charts, "This Week's Deadlines" timeline, recent-cases table, upcoming-hearings list |
 | **Cases** | Full CRUD, filters (category / status / urgency), auto-generated refs (CP-YYYY-NNNN), detailed case profiles with **status progress pipeline**, print/export |
 | **Documents** | Upload with drag-and-drop, revision tracking, review-status workflow (Draft → Filed), due-date alerts, remarks column |
-| **Tasks** | List + Kanban board views, drag-and-drop stage changes (Backlog → Todo → In Progress → Review → Done → Dropped), checklist support, progress tracking |
+| **Tasks** | List + Kanban board views, **My Tasks / All Tasks** scope toggle, drag-and-drop stage changes (Backlog → Todo → In Progress → Review → Done → Dropped), checklist support, progress tracking, **ownership enforcement** (attorneys can only edit/delete their own tasks) |
 | **Clients** | Card + Table views, tier badges (VIP / Premium / Standard), billing totals, standing status, internal notes |
 | **Calendar** | Monthly grid with colored event dots (hearings, filings, tasks, doc deadlines), day-detail side panel, month navigation |
 | **Insights** | Deep-dive analytics with **date range / attorney / category filters** — 4 performance KPIs, attorney performance charts (cases per attorney, task completion, case outcomes, workload balance), case pipeline funnel + category heatmap, document review-status pie |
@@ -59,8 +59,11 @@
 - Status workflow badges (Draft → Submitted → Under Review → Approved → Filed)
 
 ### Tasks (`/tasks`)
+- **My Tasks / All Tasks** scope toggle — "My Tasks" shows only the logged-in attorney's tasks; "All Tasks" shows the entire firm's tasks (read-only for others)
 - List view with filters (stage, urgency, owner)
 - Kanban board with drag-and-drop across stages (Backlog → Todo → In Progress → Review → Done → Dropped)
+- **Ownership enforcement** — edit/delete buttons and drag-and-drop only appear for tasks you own; other attorneys' tasks show a lock icon
+- Backend returns 403 if a user tries to modify another attorney's task
 - Progress bar, checklist items, planned vs logged hours per task
 - Urgency levels: Critical, High, Standard, Low
 
@@ -156,19 +159,19 @@ npm install
 
 Backend `.env`:
 ```env
-PORT=8080
+PORT=8081
 MONGODB_URI=mongodb://localhost:27017/casepilot
 ```
 
 Frontend `.env`:
 ```env
-VITE_API_URL=http://localhost:8080/api
+VITE_API_URL=http://localhost:8081/api
 ```
 
 ### 3. Start Development Servers
 
 ```bash
-# Terminal 1 — Backend (port 8080)
+# Terminal 1 — Backend (port 8081)
 cd backend
 npm run dev
 
@@ -181,7 +184,7 @@ npm run dev
 
 Click the **"Seed Demo Data"** button on the Dashboard, or:
 ```bash
-curl http://localhost:8080/api/seed
+curl http://localhost:8081/api/seed
 ```
 
 ## Default Login Credentials
@@ -205,7 +208,7 @@ curl http://localhost:8080/api/seed
 | GET / POST | `/api/documents` | List / Create document |
 | GET / PUT / DELETE | `/api/documents/:id` | Read / Update / Delete document |
 | GET / POST | `/api/tasks` | List / Create task |
-| GET / PUT / DELETE | `/api/tasks/:id` | Read / Update / Delete task |
+| GET / PUT / DELETE | `/api/tasks/:id` | Read / Update / Delete task (owner-only for PUT/DELETE) |
 | GET | `/api/notifications` | List notifications |
 | PUT | `/api/notifications/read-all` | Mark all as read |
 | DELETE | `/api/notifications` | Clear all notifications |
