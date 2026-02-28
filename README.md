@@ -344,6 +344,21 @@ casepilot/
 
 ---
 
+## Tools & Technologies Used
+
+| Category | Tools |
+|----------|-------|
+| **Frontend** | React 18, Vite, Tailwind CSS, Recharts, Framer Motion, Headless UI, Lucide Icons, Axios, React Router DOM |
+| **Backend** | Node.js, Express.js, Mongoose, Multer, Helmet, CORS, Morgan |
+| **Database** | MongoDB |
+| **Spreadsheet Export** | SheetJS (xlsx) |
+| **Version Control** | Git, GitHub |
+| **Code Editor** | VS Code with GitHub Copilot |
+| **Package Manager** | npm |
+| **API Testing** | Browser DevTools, cURL |
+
+---
+
 <div align="center">
 Built with ❤️ for Medicodio Assignment
 </div>

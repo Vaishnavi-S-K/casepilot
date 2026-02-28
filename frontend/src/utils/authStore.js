@@ -11,7 +11,8 @@ const defaultUsers = [
 
 function initUsers() {
   const existing = localStorage.getItem(USERS_KEY);
-  if (!existing) {
+  // Force refresh if cached users still have old domain
+  if (!existing || existing.includes('@casepilot.io')) {
     localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
   }
 }
