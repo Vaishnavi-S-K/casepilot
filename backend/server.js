@@ -49,7 +49,7 @@ app.use(errorHandler);
 const start = async () => {
   await connectDB();
   app.listen(PORT, () => {
-    console.log(`🧭 CasePilot API running on port ${PORT}`);
+    console.log(`🏛️ CasePilot API running on port ${PORT}`);
   });
 };
 

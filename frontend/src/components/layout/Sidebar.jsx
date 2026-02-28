@@ -44,7 +44,7 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-2 px-4 h-16 border-b border-indigo-800">
-        <span className="text-2xl">🧭</span>
+        <span className="text-2xl">🏛️</span>
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="text-indigo-300 hover:text-white transition-colors"

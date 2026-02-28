@@ -39,7 +39,7 @@ export default function Login() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-4xl">🧭</span>
+            <span className="text-4xl">🏛️</span>
             <span className="text-3xl font-heading font-extrabold text-indigo-600">CasePilot</span>
           </div>
           <p className="text-gray-500 mb-8">Navigate Every Case with Clarity.</p>
@@ -163,7 +163,7 @@ export default function Login() {
 
           <div className="space-y-4 mb-10">
             <div className="flex items-start gap-3">
-              <span className="text-xl">🧭</span>
+              <span className="text-xl">🏛️</span>
               <p className="text-sm text-indigo-100">Smart case tracking across your entire firm</p>
             </div>
             <div className="flex items-start gap-3">
