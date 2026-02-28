@@ -159,19 +159,19 @@ npm install
 
 Backend `.env`:
 ```env
-PORT=8081
+PORT=8080
 MONGODB_URI=mongodb://localhost:27017/casepilot
 ```
 
 Frontend `.env`:
 ```env
-VITE_API_URL=http://localhost:8081/api
+VITE_API_URL=http://localhost:8080/api
 ```
 
 ### 3. Start Development Servers
 
 ```bash
-# Terminal 1 — Backend (port 8081)
+# Terminal 1 — Backend (port 8080)
 cd backend
 npm run dev
 
@@ -184,7 +184,7 @@ npm run dev
 
 Click the **"Seed Demo Data"** button on the Dashboard, or:
 ```bash
-curl http://localhost:8081/api/seed
+curl http://localhost:8080/api/seed
 ```
 
 ## Default Login Credentials
