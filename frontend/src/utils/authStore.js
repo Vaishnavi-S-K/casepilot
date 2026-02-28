@@ -2,11 +2,11 @@ const USERS_KEY = 'cp_users';
 const SESSION_KEY = 'cp_session';
 
 const defaultUsers = [
-  { email: 'arjun@casepilot.io', password: 'Pilot2026', name: 'Arjun Mehta', role: 'Managing Partner', isAdmin: true },
-  { email: 'elena@casepilot.io', password: 'Pilot2026', name: 'Elena Vasquez', role: 'Senior Associate', isAdmin: false },
-  { email: 'daniel@casepilot.io', password: 'Pilot2026', name: 'Daniel Okafor', role: 'Associate Attorney', isAdmin: false },
-  { email: 'sofia@casepilot.io', password: 'Pilot2026', name: 'Sofia Petrov', role: 'Paralegal', isAdmin: false },
-  { email: 'kevin@casepilot.io', password: 'Pilot2026', name: 'Kevin Liang', role: 'Junior Associate', isAdmin: false },
+  { email: 'arjun@advocourt.io', password: 'Pilot2026', name: 'Arjun Mehta', role: 'Managing Partner', isAdmin: true },
+  { email: 'elena@advocourt.io', password: 'Pilot2026', name: 'Elena Vasquez', role: 'Senior Associate', isAdmin: false },
+  { email: 'daniel@advocourt.io', password: 'Pilot2026', name: 'Daniel Okafor', role: 'Associate Attorney', isAdmin: false },
+  { email: 'sofia@advocourt.io', password: 'Pilot2026', name: 'Sofia Petrov', role: 'Paralegal', isAdmin: false },
+  { email: 'kevin@advocourt.io', password: 'Pilot2026', name: 'Kevin Liang', role: 'Junior Associate', isAdmin: false },
 ];
 
 function initUsers() {

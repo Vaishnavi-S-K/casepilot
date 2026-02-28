@@ -54,7 +54,7 @@ export default function Sidebar() {
         </button>
         {!collapsed && (
           <span className="text-white font-heading font-extrabold text-lg tracking-tight">
-            CasePilot
+            Advocourt
           </span>
         )}
       </div>

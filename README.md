@@ -1,4 +1,4 @@
-# CasePilot — Attorney Case Management Platform
+# Advocourt — Attorney Case Management Platform
 
 <div align="center">
 
@@ -160,7 +160,7 @@ npm install
 Backend `.env`:
 ```env
 PORT=8080
-MONGODB_URI=mongodb://localhost:27017/casepilot
+MONGODB_URI=mongodb://localhost:27017/advocourt
 ```
 
 Frontend `.env`:
@@ -191,11 +191,11 @@ curl http://localhost:8080/api/seed
 
 | Name | Email | Password | Role |
 |------|-------|----------|------|
-| Arjun Mehta | arjun@casepilot.io | Pilot2026 | Managing Partner |
-| Elena Vasquez | elena@casepilot.io | Pilot2026 | Senior Associate |
-| Daniel Okafor | daniel@casepilot.io | Pilot2026 | Associate Attorney |
-| Sofia Petrov | sofia@casepilot.io | Pilot2026 | Paralegal |
-| Kevin Liang | kevin@casepilot.io | Pilot2026 | Junior Associate |
+| Arjun Mehta | arjun@advocourt.io | Pilot2026 | Managing Partner |
+| Elena Vasquez | elena@advocourt.io | Pilot2026 | Senior Associate |
+| Daniel Okafor | daniel@advocourt.io | Pilot2026 | Associate Attorney |
+| Sofia Petrov | sofia@advocourt.io | Pilot2026 | Paralegal |
+| Kevin Liang | kevin@advocourt.io | Pilot2026 | Junior Associate |
 
 ## API Endpoints
 

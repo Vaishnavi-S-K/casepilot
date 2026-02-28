@@ -40,7 +40,7 @@ export default function Login() {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-2">
             <span className="text-4xl">🏛️</span>
-            <span className="text-3xl font-heading font-extrabold text-indigo-600">CasePilot</span>
+            <span className="text-3xl font-heading font-extrabold text-indigo-600">Advocourt</span>
           </div>
           <p className="text-gray-500 mb-8">Navigate Every Case with Clarity.</p>
 
@@ -60,7 +60,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setErrors({}); }}
                 className={`input-field ${errors.email ? 'border-rose-400 focus:ring-rose-400' : ''}`}
-                placeholder="you@casepilot.io"
+                placeholder="you@advocourt.io"
               />
               {errors.email && <p className="text-xs text-rose-500 mt-1">{errors.email}</p>}
             </div>
@@ -179,7 +179,7 @@ export default function Login() {
           {/* Testimonial */}
           <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-card p-5">
             <p className="text-sm text-indigo-100 italic leading-relaxed mb-3">
-              "CasePilot transformed how our team tracks deadlines. We reduced missed filings by 94% in the first quarter."
+              "Advocourt transformed how our team tracks deadlines. We reduced missed filings by 94% in the first quarter."
             </p>
             <p className="text-xs text-indigo-200 font-semibold">
               — Jordan T., Partner, Meridian Law Group

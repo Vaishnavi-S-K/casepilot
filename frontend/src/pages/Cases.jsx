@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Eye, Pencil, Trash2, AlertTriangle, Printer } from 'lucide-react';
+import { Plus, Eye, Pencil, Trash2, AlertTriangle, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import PageShell, { AnimatedItem } from '../components/layout/PageShell';
 import FilterBar from '../components/ui/FilterBar';
 import Badge from '../components/ui/Badge';
@@ -162,6 +163,29 @@ export default function Cases() {
     }
   };
 
+  /* Export all visible cases to Excel */
+  const handleExportExcel = () => {
+    if (!cases.length) return toast.error('No cases to export');
+    const rows = cases.map(c => ({
+      Ref: c.ref,
+      Title: c.title,
+      Category: c.category,
+      Client: c.clientId?.fullName || '',
+      'Lead Attorney': c.leadAttorney,
+      Status: c.status,
+      Urgency: c.urgency,
+      Court: c.court || '',
+      'Hearing Date': c.hearingDate ? new Date(c.hearingDate).toLocaleDateString() : '',
+      'Filed On': c.filedOn ? new Date(c.filedOn).toLocaleDateString() : '',
+      'Portfolio Value': c.portfolioValue || 0,
+      Labels: (c.labels || []).join(', '),
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Cases');
+    XLSX.writeFile(wb, `Advocourt_Cases_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success('Cases exported to Excel');
+  };
+
   const filterConfig = [
     { key: 'category', label: 'Category', options: CATEGORIES },
     { key: 'status', label: 'Status', options: STATUSES },
@@ -178,8 +202,8 @@ export default function Cases() {
             <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-badge">{total}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => window.print()} className="btn-ghost flex items-center gap-2 text-sm">
-              <Printer size={16} /> Export
+            <button onClick={handleExportExcel} className="btn-ghost flex items-center gap-2 text-sm">
+              <Download size={16} /> Export
             </button>
             <button onClick={openCreate} className="btn-primary flex items-center gap-2">
               <Plus size={16} /> New Case

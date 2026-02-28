@@ -1,7 +1,7 @@
 {
-  "name": "casepilot-backend",
+  "name": "advocourt-backend",
   "version": "1.0.0",
-  "description": "CasePilot — Attorney Case Management Platform API",
+  "description": "Advocourt — Attorney Case Management Platform API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

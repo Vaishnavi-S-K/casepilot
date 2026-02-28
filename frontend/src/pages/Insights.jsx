@@ -12,6 +12,7 @@ import {
   Users, FileText, Activity,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 
 /* ─── Color palettes ─── */
 const PALETTE = ['#4F46E5','#0D9488','#7C3AED','#F59E0B','#EF4444','#EC4899','#06B6D4','#84CC16'];
@@ -59,9 +60,69 @@ export default function Insights() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  /* Export handler — triggers browser print dialog */
+  /* Export handler — generates Excel workbook */
   const handleExport = () => {
-    window.print();
+    if (!data) return toast.error('No data to export');
+    const wb = XLSX.utils.book_new();
+
+    /* Sheet 1 — Performance Metrics */
+    const perfRows = [
+      ['Metric', 'Value'],
+      ['Resolution Rate (%)', perf.resolutionRate || 0],
+      ['Closed Cases', perf.closedCount || 0],
+      ['Total Cases in Range', perf.totalInRange || 0],
+      ['Avg Days to Close', perf.avgDaysToClose || 0],
+      ['Task On-Time Rate (%)', perf.taskOnTimeRate || 0],
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(perfRows), 'Performance');
+
+    /* Sheet 2 — Attorney Workload */
+    if (atty.attorneyWorkload?.length) {
+      const ws2 = XLSX.utils.json_to_sheet(atty.attorneyWorkload);
+      XLSX.utils.book_append_sheet(wb, ws2, 'Attorney Workload');
+    }
+
+    /* Sheet 3 — Attorney Billable Hours */
+    if (atty.billableByAttorney?.length) {
+      const ws3 = XLSX.utils.json_to_sheet(atty.billableByAttorney);
+      XLSX.utils.book_append_sheet(wb, ws3, 'Billable Hours');
+    }
+
+    /* Sheet 4 — Task Completion by Attorney */
+    if (atty.taskCompletionByAttorney?.length) {
+      const ws4 = XLSX.utils.json_to_sheet(atty.taskCompletionByAttorney);
+      XLSX.utils.book_append_sheet(wb, ws4, 'Task Completion');
+    }
+
+    /* Sheet 5 — Avg Case Value by Attorney */
+    if (atty.avgCaseValue?.length) {
+      const ws5 = XLSX.utils.json_to_sheet(atty.avgCaseValue);
+      XLSX.utils.book_append_sheet(wb, ws5, 'Avg Case Value');
+    }
+
+    /* Sheet 6 — Case Pipeline Funnel */
+    if (pipeline.funnel?.length) {
+      const ws6 = XLSX.utils.json_to_sheet(pipeline.funnel);
+      XLSX.utils.book_append_sheet(wb, ws6, 'Pipeline Funnel');
+    }
+
+    /* Sheet 7 — Category × Status Heatmap */
+    if (heatmap.length) {
+      const hmHeader = ['Category', ...statuses];
+      const hmRows = [hmHeader, ...heatmap.map(r => [r.category, ...statuses.map(s => r[s] || 0)])];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hmRows), 'Heatmap');
+    }
+
+    /* Sheet 8 — Document Health */
+    if (docs.docsByStatus?.length) {
+      const ws8 = XLSX.utils.json_to_sheet(docs.docsByStatus);
+      XLSX.utils.book_append_sheet(wb, ws8, 'Document Status');
+    }
+
+    const rangeName = RANGE_OPTIONS.find(r => r.value === range)?.label || range;
+    const filename = `Advocourt_Insights_${rangeName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, filename);
+    toast.success('Report exported to Excel');
   };
 
   /* ─── Custom tooltip ─── */
@@ -380,7 +441,7 @@ export default function Insights() {
 
       {/* ═══ FOOTER — Print info ═══ */}
       <div className="hidden print:block text-center text-xs text-gray-400 mt-8 border-t pt-4">
-        CasePilot Insights Report · Generated {new Date().toLocaleDateString()} · Range: {RANGE_OPTIONS.find(r => r.value === range)?.label}
+        Advocourt Insights Report · Generated {new Date().toLocaleDateString()} · Range: {RANGE_OPTIONS.find(r => r.value === range)?.label}
         {attorney && ` · Attorney: ${attorney}`}{category && ` · Category: ${category}`}
       </div>
     </PageShell>

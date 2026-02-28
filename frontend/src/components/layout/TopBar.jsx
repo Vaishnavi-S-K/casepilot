@@ -27,7 +27,7 @@ export default function TopBar({ onOpenSearch, onOpenAlerts, unreadCount }) {
 
   const pathBase = '/' + location.pathname.split('/').filter(Boolean)[0] || '/';
   const pageTitle = pageTitles[pathBase] ||
-    (location.pathname.startsWith('/cases/') ? 'Case Details' : 'CasePilot');
+    (location.pathname.startsWith('/cases/') ? 'Case Details' : 'Advocourt');
 
   const handleSeed = async () => {
     try {

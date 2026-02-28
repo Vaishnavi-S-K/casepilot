@@ -27,7 +27,7 @@ app.use('/files', express.static(path.join(__dirname, 'uploads')));
 
 // ─── Health check ───
 app.get('/api/ping', (req, res) => {
-  res.json({ status: 'ok', service: 'CasePilot API', ts: new Date() });
+  res.json({ status: 'ok', service: 'Advocourt API', ts: new Date() });
 });
 
 // ─── Routes ───
@@ -49,7 +49,7 @@ app.use(errorHandler);
 const start = async () => {
   await connectDB();
   app.listen(PORT, () => {
-    console.log(`🏛️ CasePilot API running on port ${PORT}`);
+    console.log(`🏛️ Advocourt API running on port ${PORT}`);
   });
 };
 
